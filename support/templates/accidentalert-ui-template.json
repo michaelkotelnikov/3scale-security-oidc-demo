@@ -19,6 +19,12 @@
             "required": true
         },
         {
+            "description": "Client ID SSO",
+            "name": "CLIENTID",
+            "required": true,
+            "value": "poop"
+        },
+        {
             "description": "Single Sign On Authorization URL.",
             "name": "SSO_URL",
             "required": true
@@ -50,94 +56,6 @@
     ],
     "objects": [
         {
-            "kind": "BuildConfig",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "accidentalert-ui",
-                "labels": {
-                    "app": "accidentalert-ui"
-                }
-            },
-            "spec": {
-                "source": {
-                    "type": "Git",
-                    "git": {
-                        "uri": "https://github.com/jbossdemocentral/3scale-security-oidc-demo.git",
-                        "ref": "master"
-                    },
-                    "contextDir": "/projects/accidentalert-ui"
-                },
-                "strategy": {
-                    "type": "Source",
-                    "sourceStrategy": {
-                        "from": {
-                            "kind": "ImageStreamTag",
-                            "namespace": "openshift",
-                            "name": "nodejs:10"
-                        },
-                        "env": [
-                            {
-                                "name": "SSO_URL",
-                                "value": "${SSO_URL}"
-                            },
-                            {
-                                "name": "BACKEND_URL",
-                                "value": "${BACKEND_URL}"
-                            },
-                            {
-                                "name": "LIVERELOAD",
-                                "value": "${LIVERELOAD}"
-                            }
-                        ]
-                    }
-                },
-                "output": {
-                    "to": {
-                        "kind": "ImageStreamTag",
-                        "name": "accidentalert-ui:latest"
-                    }
-                },
-                "triggers": [
-                    {
-                        "type": "GitHub",
-                        "github": {
-                            "secret": "${GITHUB_TRIGGER_SECRET}"
-                        }
-                    },
-                    {
-                        "type": "Generic",
-                        "generic": {
-                            "secret": "${GENERIC_TRIGGER_SECRET}"
-                        }
-                    },
-                    {
-                        "type": "ImageChange"
-                    },
-                    {
-                        "type": "ConfigChange"
-                    }
-                ]
-            }
-        },
-        {
-            "kind": "ImageStream",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "accidentalert-ui",
-                "labels": {
-                    "app": "accidentalert-ui"
-                }
-            },
-            "spec": {
-                "dockerImageRepository": "",
-                "tags": [
-                    {
-                        "name": "latest"
-                    }
-                ]
-            }
-        },
-        {
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
@@ -167,9 +85,26 @@
                         "containers": [
                             {
                                 "name": "accidentalert-ui",
-                                "image": "accidentalert-ui",
+                                "image": "nodejs-accidentalert",
                                 "imagePullPolicy": "Always",
-                                "env": [],
+                                "env": [
+                                    {
+                                        "name": "SSO_URL",
+                                        "value": "${SSO_URL}"
+                                    },
+                                    {
+                                        "name": "BACKEND_URL",
+                                        "value": "${BACKEND_URL}"
+                                    },
+                                    {
+                                        "name": "LIVERELOAD",
+                                        "value": "${LIVERELOAD}"
+                                    },
+                                    {
+                                        "name": "CLIENTID",
+                                        "value": "${CLIENTID}"
+                                    }
+                                ],
                                 "ports": [
                                     {
                                         "name": "alertui-http",
@@ -196,7 +131,7 @@
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
-                                "name": "accidentalert-ui:latest"
+                                "name": "nodejs-accidentalert:1.0"
                             }
                         }
                     },
